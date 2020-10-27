@@ -1,6 +1,8 @@
+const verifyToken = require('../middlewares/validate-token');
+
 const router = require('express').Router();
 
-router.get('/', (req, res) => {
+router.get('/',verifyToken, (req, res) => {
     res.json({
         error: null,
         data: {
