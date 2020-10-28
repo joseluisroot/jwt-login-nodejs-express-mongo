@@ -1,4 +1,4 @@
 ﻿# jwt-login-nodejs-express-mongo
  
  
- MigratioTS Support by @bloppa nad @MagicJumper
+ MigratioTS Support by @bloppa nad @CoffeJeanCode
