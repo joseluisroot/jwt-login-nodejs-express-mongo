@@ -1,23 +1,28 @@
-const User = require("../models/User");
-const jwt = require("jsonwebtoken");
-const Joi = require("@hapi/joi");
+import { Request, Response } from "express";
+import { comparePassword, encryptPassword } from "../helpers/passwords";
+import IRequest from "../types";
 
-const AuthCtrl = {};
+import User from '../models/User';
+import jwt from 'jsonwebtoken';
+import Joi from "@hapi/joi";
 
-AuthCtrl.signIn = async (req, res) => {
+export const signIn = async (req:Request, res:Response) => {
+  
   const schemaLogin = Joi.object({
     email: Joi.string().min(6).max(255).required().email(),
     password: Joi.string().min(6).max(1024).required(),
   });
+ 
   // validaciones
   const { error } = schemaLogin.validate(req.body);
+  
   if (error) return res.status(400).json({ error: error.details[0].message });
 
   const user = await User.findOne({ email: req.body.email });
   if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
-  const validPassword = await User.comparePassword(
-    iser.password,
+  const validPassword = await comparePassword(
+    user.password,
     req.body.password
   ); //llamamos a la funcion creada en el modelo de User para comparar las contraseñas
   if (!validPassword)
@@ -29,7 +34,7 @@ AuthCtrl.signIn = async (req, res) => {
     {
       id: user._id, //we save user id to save in req varible in middleware when we deencode token
     },
-    process.env.TOKEN_SECRET, //secret to encode token, will be needed to deencode token
+    process.env.TOKEN_SECRET || '', //secret to encode token, will be needed to deencode token
     { expiresIn: 172800 } //we set time ti expires the token (48h) when token expires user need to sign in again
   );
 
@@ -42,37 +47,44 @@ AuthCtrl.signIn = async (req, res) => {
   // })
 };
 
-AuthCtrl.register = async (req, res) => {
+export const register = async (req:Request, res:Response) => {
+  
   const schemaRegister = Joi.object({
     name: Joi.string().min(6).max(255).required(),
     email: Joi.string().min(6).max(255).required().email(),
     password: Joi.string().min(6).max(1024).required(),
   });
-
-  // validate user
-  const { error } = schemaRegister.validate(req.body);
-
-  if (error) {
-    return res.status(400).json({ error: error.details[0].message });
-  }
+  
+  const {name, email, password} = req.body
 
   const user = new User({
-    name: req.body.name,
-    email: req.body.email,
-    password: await User.encryptPassword(req.body.password),
-  });
+    name,
+    email,
+    password: await encryptPassword(password)
+  })
 
-  try {
-    const savedUser = await user.save();
-    res.json({
-      error: null,
-      data: savedUser,
-    });
+  const savedUser = await user.save()
 
-    //res.redirect("ruta");
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+  const token = jwt.sign({id: savedUser._id}, process.env.TOKEN_SECRET || '', {
+    expiresIn: 172800
+  })
+
+  return res.json(token)
+
 };
 
-module.exports = AuthCtrl;
+export const getDataUserbyToken = async(req:IRequest, res:Response)=>{
+
+  console.log(req.userId);
+  const user = await User.findById(req.userId, {password: 0});
+
+  if(!user){
+    return res.status(404).json({
+      message:"User not found"
+    });
+  }
+
+  return res.json(user);
+  
+}
+
