@@ -1,12 +1,13 @@
-require('dotenv').config()
-const express = require('express');
-const morgan = require('morgan');
-const bodyparser = require('body-parser');
-const cors = require('cors');
-require('./database')
+import dotenv from 'dotenv';
+dotenv.config();
 
+import './database';
+import express, {Application} from 'express';
+import morgan from 'morgan';
+import bodyparser from 'body-parser';
+import cors from 'cors';
 
-const app = express();
+const app:Application = express();
 
 // settings
 app.set('PORT', process.env.PORT || 3001)
@@ -19,8 +20,8 @@ app.use(morgan('dev'))
 
 
 // import routes
-const authRoutes = require('./routes/auth');
-const dashboadRoutes = require('./routes/dashboard');
+import authRoutes from './routes/auth';
+import dashboadRoutes from './routes/dashboard';
 
 // route middlewares
 app.use('/api/dashboard', dashboadRoutes);
@@ -34,4 +35,4 @@ app.use('/api/user', authRoutes);
 // });
 
 
-module.exports = app;
+export default app
