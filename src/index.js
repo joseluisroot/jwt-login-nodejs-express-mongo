@@ -1,4 +1,4 @@
-require("./database");
+
 const app = require("./app");
 
 // iniciar server
@@ -8,4 +8,4 @@ const main = () => {
   });
 };
 
-main()
+main();

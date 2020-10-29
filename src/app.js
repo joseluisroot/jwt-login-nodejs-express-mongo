@@ -1,10 +1,10 @@
-require('dotenv').config()
+
+require('dotenv').config();
+require('./database');
 const express = require('express');
 const morgan = require('morgan');
 const bodyparser = require('body-parser');
 const cors = require('cors');
-require('./database')
-
 
 const app = express();
 
