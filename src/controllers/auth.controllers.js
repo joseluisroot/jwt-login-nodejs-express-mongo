@@ -17,7 +17,7 @@ AuthCtrl.signIn = async (req, res) => {
   if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
   const validPassword = await User.comparePassword(
-    iser.password,
+    user.password,
     req.body.password
   ); //llamamos a la funcion creada en el modelo de User para comparar las contraseñas
   if (!validPassword)
