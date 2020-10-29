@@ -1,10 +1,12 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const Joi = require("@hapi/joi");
+const { json } = require("body-parser");
 
 const AuthCtrl = {};
 
 AuthCtrl.signIn = async (req, res) => {
+  
   const schemaLogin = Joi.object({
     email: Joi.string().min(6).max(255).required().email(),
     password: Joi.string().min(6).max(1024).required(),
@@ -14,12 +16,16 @@ AuthCtrl.signIn = async (req, res) => {
   if (error) return res.status(400).json({ error: error.details[0].message });
 
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
 
+  
+  if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
+  
   const validPassword = await User.comparePassword(
     user.password,
     req.body.password
   ); //llamamos a la funcion creada en el modelo de User para comparar las contraseñas
+
+
   if (!validPassword)
     return res.status(400).json({ error: "contraseña no válida" });
 
@@ -52,27 +58,44 @@ AuthCtrl.register = async (req, res) => {
   // validate user
   const { error } = schemaRegister.validate(req.body);
 
-  if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+  if(error){
+    res.status(400).json({error});
   }
 
+  const {
+    name,
+    email,
+    password
+  } = req.body;
+ 
   const user = new User({
-    name: req.body.name,
-    email: req.body.email,
-    password: await User.encryptPassword(req.body.password),
+    name,
+    email,
+    password: await User.encryptPassword(password)
   });
 
-  try {
-    const savedUser = await user.save();
-    res.json({
-      error: null,
-      data: savedUser,
-    });
+  const userSave = await user.save();
 
-    //res.redirect("ruta");
-  } catch (error) {
-    res.status(400).json({ error });
-  }
+  const token = jwt.sign({
+    id:userSave._id
+  },
+  process.env.TOKEN_SECRET,
+  { expiresIn: 172800 }
+  );
+  
+  res.json(token);
+ 
+};
+
+AuthCtrl.getDataUserbyToken = async (req,res) =>{
+
+  console.log(req.userId);
+const user = await User.findById(req.userId, {password:0});
+
+if(!user)return res.status(404).json({message:"User not Found"});
+
+res.json(user);
+
 };
 
 module.exports = AuthCtrl;
