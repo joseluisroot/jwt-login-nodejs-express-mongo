@@ -25,7 +25,8 @@ const userSchema = new Schema({
 })
 
 userSchema.statics.comparePassword = async (password, recivedPassword) => {
-    await bcrypt.compare(recivedPassword, password)
+
+    return await bcrypt.compare(recivedPassword, password)
 }
 
 userSchema.statics.encryptPassword = async (password) => {
