@@ -11,8 +11,15 @@ const app = express();
 // settings
 app.set('PORT', process.env.PORT || 3001)
 
+// cors
+var corsOptions = {
+    origin: '*', // Reemplazar con dominio
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+app.use(cors(corsOptions));
+
 //middlewares
-app.use(cors())
 app.use(bodyparser.urlencoded({ extended: false }));
 app.use(bodyparser.json());
 app.use(morgan('dev'))
@@ -26,12 +33,12 @@ const dashboadRoutes = require('./routes/dashboard');
 app.use('/api/dashboard', dashboadRoutes);
 app.use('/api/user', authRoutes);
 
-// app.get('/', (req, res) => {
-//     res.json({
-//         estado: true,
-//         mensaje: 'funciona!'
-//     })
-// });
+app.get('/', (req, res) => {
+    res.json({
+        estado: true,
+        mensaje: 'funciona!'
+    })
+});
 
 
 module.exports = app;
