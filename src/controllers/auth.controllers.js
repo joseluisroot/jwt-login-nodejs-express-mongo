@@ -39,13 +39,12 @@ AuthCtrl.signIn = async (req, res) => {
     { expiresIn: 172800 } //we set time ti expires the token (48h) when token expires user need to sign in again
   );
 
-  res.json(token); //we send him token if all was right
+  res.json({
+      error: null,
+      data: 'exito bienvenido',
+      token: token
+  });//we send him token if all was right
 
-  // res.json({
-  //     error: null,
-  //     data: 'exito bienvenido',
-  //     token: token
-  // })
 };
 
 AuthCtrl.register = async (req, res) => {
@@ -89,7 +88,7 @@ AuthCtrl.register = async (req, res) => {
 
 AuthCtrl.getDataUserbyToken = async (req,res) =>{
 
-  console.log(req.userId);
+  //console.log(req.userId);
 const user = await User.findById(req.userId, {password:0});
 
 if(!user)return res.status(404).json({message:"User not Found"});
