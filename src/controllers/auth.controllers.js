@@ -41,8 +41,8 @@ AuthCtrl.signIn = async (req, res) => {
 
   res.json({
       error: null,
-      data: 'exito bienvenido',
-      token: token
+      message: 'exito bienvenido',
+      data: token
   });//we send him token if all was right
 
 };
