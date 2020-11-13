@@ -7,6 +7,8 @@ const AuthCtrl = {};
 
 AuthCtrl.signIn = async (req, res) => {
   
+  //plugin https://hapi.dev/ => joi
+
   const schemaLogin = Joi.object({
     email: Joi.string().min(6).max(255).required().email(),
     password: Joi.string().min(6).max(1024).required(),
@@ -16,7 +18,6 @@ AuthCtrl.signIn = async (req, res) => {
   if (error) return res.status(400).json({ error: error.details[0].message });
 
   const user = await User.findOne({ email: req.body.email });
-
   
   if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
   
